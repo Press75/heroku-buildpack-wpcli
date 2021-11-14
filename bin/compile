@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -eu           # fail fast
+set -o pipefail   # don't ignore exit codes when piping output
+# set -x          # enable debugging
+
+echo "-----> WPCLI Buildpack"
+
+# Configure directories
+BUILD_DIR=$1
+
+cd $BUILD_DIR
+echo "Build Directory: $BUILD_DIR"
+
+echo "-----> Install WP-CLI"
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+chmod +x wp-cli.phar
+mkdir -p $BUILD_DIR/.heroku/wp/bin/
+mv wp-cli.phar $BUILD_DIR/.heroku/wp/bin/wp
+
+echo "-----> Setup Binary path"
+mkdir -p "$BUILD_DIR"/.profile.d
+cat <<EOF > "$BUILD_DIR"/.profile.d/200-wpcli.sh
+export PATH="$HOME/.heroku/wp/bin:$PATH"
+EOF
